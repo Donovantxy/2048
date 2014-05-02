@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html ng-app="my2048">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>2048 by Fulvio</title>
+
+    <link rel="stylesheet" href="css/reset.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+
+    <script src="../../angular.min.js"></script>
+    <script src="../../jquery-1.11.0.min.js"></script>
+    <script src="app/controllers/mycontroller.js"></script>
+    <script src="app/services/myservice.js"></script>
+
+
+
+</head>
+
+<body ng-controller="myCtrl" ng-keyup="command($event);">
+
+<ul id="grid" >
+    <li ng-repeat="row1 in grid[0] track by $index" ng-style="{color: !!grid[0][$index] ? grid[0][$index].getColor() : 'black'}">{{grid[0][$index].getVal()}}</li>
+    <li ng-repeat="row1 in grid[1] track by $index" ng-style="{color: !!grid[1][$index] ? grid[1][$index].getColor() : 'black'}">{{grid[1][$index].getVal()}}</li>
+    <li ng-repeat="row1 in grid[2] track by $index" ng-style="{color: !!grid[2][$index] ? grid[2][$index].getColor() : 'black'}">{{grid[2][$index].getVal()}}</li>
+    <li ng-repeat="row1 in grid[3] track by $index" ng-style="{color: !!grid[3][$index] ? grid[3][$index].getColor() : 'black'}">{{grid[3][$index].getVal()}}</li>
+</ul>
+
+<h2 ng-style="{color: myColor}">{{howManyFilledSq}}</h2>
+
+</body>
+</html>
