@@ -47,7 +47,6 @@ var Grid = function(_grid){
                     filledSq.push(grid[i][j]);
                     grid[i][j].setRC(i,j);
                     grid[i][j].setColor("black");
-
                 }
                 howManyFreeInRow[i] = contR;
 
@@ -57,21 +56,28 @@ var Grid = function(_grid){
         //console.log(howManyFreeInRow, howManyFreeInCol);
     }//***
 
+    /*
+    * resetReplacedSqFalse: resets the value isReplaced at the original value (false) for any square into the grid
+    * */
+    var resetReplacedSqFalse = function(){
+        for (var i = 0; i < filledSq.length; i++){ filledSq[i].isReplaced=false; }
+    }
 
     this.getHowManyFilledSq = function(){ return filledSq.length; }
 
     var countNewSq = 0;
     this.putNewSq = function(){
-        countNewSq++;
-        newNumber = 2;//Math.random()<0.8 ? 2 : 4;
-        newPosition = parseInt(Math.round( Math.random()*(freeSq.length-1)) );
-        //console.log(newPosition, freeSq);
-        r = parseInt(freeSq[newPosition].split(",")[0]);
-        c = parseInt(freeSq[newPosition].split(",")[1])
-        grid[r][c] = new Square(newNumber, r, c, grid);
-        checkSq();
-        grid[r][c].setColor("red");
-        //console.log(filledSq);
+        if(freeSq.length>0){
+            countNewSq++;
+            newNumber = 2;//Math.random()<0.8 ? 2 : 4;
+            newPosition = parseInt(Math.round(Math.random() * (freeSq.length - 1)));
+            //console.log(newPosition, freeSq);
+            r = parseInt(freeSq[newPosition].split(",")[0]);
+            c = parseInt(freeSq[newPosition].split(",")[1])
+            grid[r][c] = new Square(newNumber, r, c, grid);
+            checkSq();
+            grid[r][c].setColor("red");
+        }
     }//***
 
 
@@ -79,8 +85,7 @@ var Grid = function(_grid){
     this.move = function(dir, onlyMove){
         var isSomeMoved = false;
 
-            filledSq_copy = dir>38 ? filledSq.slice().reverse() : filledSq;
-            //console.log(filledSq_copy);
+        filledSq_copy = dir>38 ? filledSq.slice().reverse() : filledSq;
 
         for (var i = 0; i < filledSq_copy.length; i++) {//console.log(i);
                 sq = filledSq_copy[i];
@@ -88,7 +93,7 @@ var Grid = function(_grid){
                 shifts = 0;
                 replaced = false;
 
-                //console.log(sqrc, i);
+                //console.log(sq, i);
                 switch(dir){
                     case 37:
                         while ((sqrc[1] - shifts - 1) > -1 && !grid[sqrc[0]][sqrc[1] - shifts - 1]) {
@@ -156,12 +161,10 @@ var Grid = function(_grid){
 
                 }//SWITCH
 
-                //if(!!onlyMove) break;
-                onlyMove = !!onlyMove ? false : !!onlyMove;
-
             }//FOR
 
-            checkSq();
+            if(isSomeMoved) this.putNewSq();
+            resetReplacedSqFalse();
 
 
     }//***
@@ -175,21 +178,27 @@ var Grid = function(_grid){
     this.replaceSq = function(r, c, RL_or_UD, shifts, BF, limitGridCondition, isSomeMoved, dir) {
         //console.log([r,c]+" *********************************
         if (RL_or_UD) {
-            if ((limitGridCondition && !!grid[r][c + shifts + BF]) && (grid[r][c + shifts].getVal() == grid[r][c + shifts + BF].getVal() )) {
-                grid[r][c + shifts + BF].setVal(grid[r][c + shifts].getVal() * 2);
-                grid[r][c + shifts] = false;
-                checkSq();
-                this.move(dir, true);
-                return true;
+            if((limitGridCondition && !!grid[r][c + shifts + BF]) && (grid[r][c + shifts].getVal() == grid[r][c + shifts + BF].getVal() )) {
+                if( !grid[r][c + shifts + BF].isReplaced ){
+                    grid[r][c + shifts + BF].setVal(grid[r][c + shifts].getVal() * 2);
+                    grid[r][c + shifts] = false;
+                    grid[r][c + shifts + BF].isReplaced = true;
+                    checkSq();
+                    //this.move(dir, true);
+                    return true;
+                }
             }
         }
         else {
             if ((limitGridCondition && !!grid[r + shifts + BF][c]) && (grid[r + shifts][c].getVal() == grid[r + shifts + BF][c].getVal() )) {
-                grid[r + shifts + BF][c].setVal(grid[r + shifts + BF][c].getVal() * 2);
-                grid[r + shifts][c] = false;
-                checkSq();
-                this.move(dir, tru
-                return true;
+                if( !grid[r + shifts + BF][c].isReplaced ) {
+                    grid[r + shifts + BF][c].setVal(grid[r + shifts + BF][c].getVal() * 2);
+                    grid[r + shifts][c] = false;
+                    grid[r + shifts + BF][c].isReplaced = true;
+                    checkSq();
+                    //this.move(dir, true);
+                    return true;
+                }
             }
         }
 
@@ -202,7 +211,7 @@ var Grid = function(_grid){
         checkSq();
         _this.putNewSq();
         _this.putNewSq();
-        for(jj=0; jj<14; jj++){ _this.putNewSq(); }
+        //for(jj=0; jj<14; jj++){ _this.putNewSq(); }
     }//***
     this.init();
 
@@ -226,23 +235,9 @@ var Square = function(val, _r, _c, _grid){
     this.getVal = function(){ return val; }
     this.setVal = function(_val){ val=_val; }
     this.getRC = function(){ return [r,c]; }
-    this.setRC = function(_r,_c){ r=_r, c=_c; this.ID = r+","+c; setSides(); }
+    this.setRC = function(_r,_c){ r=_r, c=_c; this.ID = r+","+c; }
     this.getColor = function(){ return color; }
     this.setColor = function(_color){ color = _color; }
-
-    /*
-    * Updates the square's sides
-    * */
-    var setSides = function(){
-        sides = {
-            left: c>0 && !!grid[r][c-1] ? grid[r][c-1] : false,
-            top: r>0 && !!grid[r-1][c] ? grid[r-1][c] : false,
-            right: c+1<grid.length && !!grid[r][c+1] ? grid[r][c+1] : false,
-            bottom: r+1>grid.length && !!grid[r+1][c] ? grid[r+1][c] : false
-        };
-    };
-
-    this.getSides = function(){ return sides; }
 
     var init = function(){
         _this.setRC(r, c);
