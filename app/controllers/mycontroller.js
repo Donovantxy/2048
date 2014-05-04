@@ -26,25 +26,6 @@ app.controller("myCtrl", ["$scope", "$2048", function($scope, $2048){
         }
     }
 
-       arr = [1,2, , 5];
-       delete arr[0];
-       //console.log(undefined, !undefined, !!undefined, arr[1], !arr[1], !!arr[1]);
-
-
 
 
 }]);
-
-
-/*
-function fizzbuzz(start, end){
-    if(start>end){ return; }
-
-    var str = !(start%3) ? "Fizz" : "";
-    str += !(start%5) ? "Buzz" : "";
-    console.log( str.length>0 ? str : start );
-    return fizzbuzz(++start, end);
-}
-
-fizzbuzz(1, 100);
-*/

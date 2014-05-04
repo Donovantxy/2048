@@ -46,7 +46,9 @@ var Grid = function(_grid){
                     howManyFreeInCol[j] = !howManyFreeInCol[j] ? 0 : howManyFreeInCol[j];
                     filledSq.push(grid[i][j]);
                     grid[i][j].setRC(i,j);
+                    grid[i][j].move();
                     grid[i][j].setColor("black");
+
                 }
                 howManyFreeInRow[i] = contR;
 
@@ -57,7 +59,7 @@ var Grid = function(_grid){
     }//***
 
     /*
-    * resetReplacedSqFalse: resets the value isReplaced at the original value (false) for any square into the grid
+    * resetReplacedSqFalse - resets the value isReplaced at the original value (false) for any square into the grid
     * */
     var resetReplacedSqFalse = function(){
         for (var i = 0; i < filledSq.length; i++){ filledSq[i].isReplaced=false; }
@@ -69,7 +71,7 @@ var Grid = function(_grid){
     this.putNewSq = function(){
         if(freeSq.length>0){
             countNewSq++;
-            newNumber = 2;//Math.random()<0.8 ? 2 : 4;
+            newNumber = Math.random()<0.8 ? 2 : 4;
             newPosition = parseInt(Math.round(Math.random() * (freeSq.length - 1)));
             //console.log(newPosition, freeSq);
             r = parseInt(freeSq[newPosition].split(",")[0]);
@@ -163,7 +165,7 @@ var Grid = function(_grid){
 
             }//FOR
 
-            if(isSomeMoved) this.putNewSq();
+            if(isSomeMoved){ this.putNewSq(); }
             resetReplacedSqFalse();
 
 
@@ -181,10 +183,15 @@ var Grid = function(_grid){
             if((limitGridCondition && !!grid[r][c + shifts + BF]) && (grid[r][c + shifts].getVal() == grid[r][c + shifts + BF].getVal() )) {
                 if( !grid[r][c + shifts + BF].isReplaced ){
                     grid[r][c + shifts + BF].setVal(grid[r][c + shifts].getVal() * 2);
-                    grid[r][c + shifts] = false;
+                    grid[r][c + shifts + BF].upDateValImg();
+
+                    this.remove(r, c+shifts);
+                    //grid[r][c+shifts].delSquareImg();
+                    //grid[r][c+shifts] = false;
+
                     grid[r][c + shifts + BF].isReplaced = true;
                     checkSq();
-                    //this.move(dir, true);
+
                     return true;
                 }
             }
@@ -193,10 +200,15 @@ var Grid = function(_grid){
             if ((limitGridCondition && !!grid[r + shifts + BF][c]) && (grid[r + shifts][c].getVal() == grid[r + shifts + BF][c].getVal() )) {
                 if( !grid[r + shifts + BF][c].isReplaced ) {
                     grid[r + shifts + BF][c].setVal(grid[r + shifts + BF][c].getVal() * 2);
-                    grid[r + shifts][c] = false;
+                    grid[r + shifts + BF][c].upDateValImg();
+
+                    this.remove(r + shifts, c);
+                    //grid[r + shifts][c].delSquareImg();
+                    //grid[r + shifts][c] = false;
+
                     grid[r + shifts + BF][c].isReplaced = true;
                     checkSq();
-                    //this.move(dir, true);
+
                     return true;
                 }
             }
@@ -205,6 +217,12 @@ var Grid = function(_grid){
         checkSq();
         return isSomeMoved;
     }//***
+
+
+    this.remove = function(r, c){
+        grid[r][c].delSquareImg();
+        grid[r][c] = false;
+    };
 
 
     this.init = function(){
@@ -219,33 +237,60 @@ var Grid = function(_grid){
 
 
 
+
+
+/*
+* Square obj represents the filled square inside the grid
+* */
 var Square = function(val, _r, _c, _grid){
     var _this = this;
     var c = _c;//column
     var r = _r;//row
     var grid = _grid;
-    this.ID = r+":"+c;
     var val = val;
     var sides = {};
     var color = "black";
     this.isReplaced = false;
-
+    this.domel = null;
+    var margin = 10;//amount of pixel top left and between two adiacent squares
+    var lside = 100;//width/height of square
 
     //*** functions ***//
     this.getVal = function(){ return val; }
     this.setVal = function(_val){ val=_val; }
     this.getRC = function(){ return [r,c]; }
-    this.setRC = function(_r,_c){ r=_r, c=_c; this.ID = r+","+c; }
+    this.setRC = function(_r,_c){ r=_r, c=_c; }
     this.getColor = function(){ return color; }
-    this.setColor = function(_color){ color = _color; }
+    this.setColor = function(_color){ this.domel.css("color", _color); }
+
+
+    /******************************* DOM ********************************/
+
+
+    this.injSquareImg = function(){
+        this.domel = $('<div class="sqImg">'+this.getVal()+'</div>').css({"top": (r*(lside+margin)+margin), "left": (c*(lside+margin)+margin)}).appendTo($("#wrap"));
+    }
+
+    this.move = function(){ //console.log(r, c);
+        this.domel.css({ "top": (this.getRC()[0]*(lside+margin)+margin), "left": (this.getRC()[1]*(lside+margin)+margin) });
+    }
+
+    this.upDateValImg = function(){
+        this.domel.text( this.getVal() );
+    }
+
+    this.delSquareImg = function(){
+        this.domel.remove();
+    }
+
 
     var init = function(){
         _this.setRC(r, c);
+        _this.injSquareImg();
     }
     init();
-
     return this;
 
-}
+};
 
 
