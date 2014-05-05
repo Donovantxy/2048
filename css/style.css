@@ -40,12 +40,28 @@
 
 .sqImg{
     position: absolute;
-    background-color: #ffffd4;
+    z-index: 5;
 
-    -webkit-transition: all 0.2s ease-out;
-    -moz-transition: all 0.2s ease-out;
-    transition: all 0.2s ease-out;
+    -webkit-transition: all 0.2s ease-out, opacity 0.75s ease-out;
+    -moz-transition: all 0.2s ease-out, opacity 0.75s ease-out;
+    -o-transition: all 0.2s ease-out, opacity 0.75s ease-out;
+    transition: all 0.2s ease-out, opacity 0.75s ease-out;
 
+}
+
+.sqImg span{
+    background-color: rgb(230, 255, 180);
+    position: absolute;
+    margin:auto;
+    top:0;
+    left: 0;
+    right:0;
+    bottom:0;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -o-border-radius: 4px;
+    font-size: 80px;
 }
 
 

@@ -75,7 +75,7 @@ var Grid = function(_grid){
             newPosition = parseInt(Math.round(Math.random() * (freeSq.length - 1)));
             //console.log(newPosition, freeSq);
             r = parseInt(freeSq[newPosition].split(",")[0]);
-            c = parseInt(freeSq[newPosition].split(",")[1])
+            c = parseInt(freeSq[newPosition].split(",")[1]);
             grid[r][c] = new Square(newNumber, r, c, grid);
             checkSq();
             grid[r][c].setColor("red");
@@ -185,9 +185,7 @@ var Grid = function(_grid){
                     grid[r][c + shifts + BF].setVal(grid[r][c + shifts].getVal() * 2);
                     grid[r][c + shifts + BF].upDateValImg();
 
-                    this.remove(r, c+shifts);
-                    //grid[r][c+shifts].delSquareImg();
-                    //grid[r][c+shifts] = false;
+                    this.remove(r, c+shifts, grid[r][c + shifts + BF]);
 
                     grid[r][c + shifts + BF].isReplaced = true;
                     checkSq();
@@ -202,9 +200,7 @@ var Grid = function(_grid){
                     grid[r + shifts + BF][c].setVal(grid[r + shifts + BF][c].getVal() * 2);
                     grid[r + shifts + BF][c].upDateValImg();
 
-                    this.remove(r + shifts, c);
-                    //grid[r + shifts][c].delSquareImg();
-                    //grid[r + shifts][c] = false;
+                    this.remove(r + shifts, c, grid[r + shifts + BF][c]);
 
                     grid[r + shifts + BF][c].isReplaced = true;
                     checkSq();
@@ -219,8 +215,8 @@ var Grid = function(_grid){
     }//***
 
 
-    this.remove = function(r, c){
-        grid[r][c].delSquareImg();
+    this.remove = function(r, c, holdingSq){
+        grid[r][c].delSquareImg(holdingSq);
         grid[r][c] = false;
     };
 
@@ -268,7 +264,18 @@ var Square = function(val, _r, _c, _grid){
 
 
     this.injSquareImg = function(){
-        this.domel = $('<div class="sqImg">'+this.getVal()+'</div>').css({"top": (r*(lside+margin)+margin), "left": (c*(lside+margin)+margin)}).appendTo($("#wrap"));
+        this.domel = $('<div class="sqImg"><span>'+this.getVal()+'</span></div>').css({"top": (r*(lside+margin)+margin), "left": (c*(lside+margin)+margin)}).appendTo($("#wrap"));
+        span = this.domel.find("span");
+        span.css({"width":10, "height":10, "font-size": 4, "line-height":4, "left":20, "top":20, "z-index":"100"}).animate({
+            "width":100,
+            "height":100,
+            "font-size":80,
+            "line-height":100,
+            "top":0,
+            "left":0,
+            "z-index":"5"
+        }, 200, "easeOutBack");
+
     }
 
     this.move = function(){ //console.log(r, c);
@@ -276,11 +283,22 @@ var Square = function(val, _r, _c, _grid){
     }
 
     this.upDateValImg = function(){
-        this.domel.text( this.getVal() );
+        span = this.domel.find("span");
+        rgb = span.css("background-color").replace(/[a-z\(\) ]*/g, "").split(",");
+        rgb[0] = parseInt(rgb[0])-10; rgb[1] = parseInt(rgb[1])-10;
+        val = this.getVal();
+        font_size = (val+"").length == 1 ? 80 : ((val+"").length==2 ? 70 : ((val+"").length==3 ? 60 : 40 ));
+        span.text(this.getVal()).css({"font-size":"100px", "color":"red", "opacity":0, "z-index":20}).animate(
+            {"font-size":font_size, "color":"black", "opacity":1, "z-index":5, "background-color":"rgb("+rgb[0]+","+rgb[1]+",180)"},
+            500
+        );
+
     }
 
-    this.delSquareImg = function(){
-        this.domel.remove();
+    this.delSquareImg = function(holdingSq){
+        this.domel.css({"z-index":"10", "opacity":0, "top":holdingSq.domel.css("top"), "left":holdingSq.domel.css("left") })
+            .delay(1000).queue(function(){ $(this).remove(); });
+
     }
 
 
